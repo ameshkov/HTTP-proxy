@@ -9,6 +9,10 @@
 #define PROXY_PORT_DEFAULT      8888
 #define PROXY_CLIENT_QUEUE_MAX  32
 
+void process_clients(void) {
+    while (1);
+}
+
 int main(int argc, char** argv)
 {
     http_proxy *proxy;
@@ -21,6 +25,8 @@ int main(int argc, char** argv)
 
     error = proxy_init(&proxy, port);
     if (error) return 1;
+
+    start_worker((worker_job *)process_clients);
 
     while (1) {
         error = proxy_listen(proxy, PROXY_CLIENT_QUEUE_MAX);

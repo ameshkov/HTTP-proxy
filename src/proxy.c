@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <unistd.h>
 
 struct http_proxy {
     int                 socket_fd;
@@ -64,6 +65,8 @@ http_proxy_client *proxy_accept(http_proxy *proxy) {
     int error = 0;
     http_proxy_client *client;
 
+    if (proxy == NULL) return NULL;
+
     client = malloc(sizeof(http_proxy_client));
     memset(client, 0, sizeof(http_proxy_client));
 
@@ -83,4 +86,16 @@ err:
 
 int proxy_shutdown(http_proxy *proxy) {
     return 0;
+}
+
+pid_t start_worker(worker_job *job) {
+    pid_t worker_pid;
+    if (job == NULL) return -1;
+
+    if (!(worker_pid = fork())) {
+        job();
+        exit;
+    }
+
+    return worker_pid;
 }
