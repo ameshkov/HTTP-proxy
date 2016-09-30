@@ -15,15 +15,19 @@
 static pid_t           workers[NUM_WORKERS];
 static unsigned int    active_workers = 0;
 
+void child_exit_handler(int signo) {
+    signal (SIGCHLD, child_exit_handler);
+    wait(NULL);
+}
+
 void process_clients(void) {
-    while (1);
+    //while (1);
 }
 
 void kill_workers(void) {
     int status;
     for (int i = 0; i < active_workers; i++) {
         kill(workers[i], SIGTERM);
-        waitpid(workers[i], &status, 0);
     }
     active_workers = 0;
 }
@@ -42,6 +46,8 @@ int run_workers(unsigned int num_workers, worker_job *job) {
         workers[i] = worker_pid;
         active_workers++;
     }
+
+    return active_workers;
 }
 
 int main(int argc, char** argv)
@@ -57,15 +63,16 @@ int main(int argc, char** argv)
     error = proxy_init(&proxy, port);
     if (error) return 1;
 
+    signal (SIGCHLD, child_exit_handler);
+
     run_workers(NUM_WORKERS, (worker_job *)process_clients);
-    //start_worker((worker_job *)process_clients);
 
     while (1) {
         error = proxy_listen(proxy, PROXY_CLIENT_QUEUE_MAX);
         if (error) return 1;
 
-        client = proxy_accept(proxy);
-        if (!client) return 1;
+        //client = proxy_accept(proxy);
+        //if (!client) return 1;
     }
 
     return 0;

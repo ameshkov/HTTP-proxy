@@ -8,8 +8,10 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/fcntl.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <errno.h>
 
 struct http_proxy {
     int                 socket_fd;
@@ -31,7 +33,8 @@ int proxy_init(http_proxy **proxy, unsigned int port) {\
     *proxy = malloc(sizeof(http_proxy));
     memset(*proxy, 0, sizeof(http_proxy));
 
-    (*proxy)->socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    (*proxy)->socket_fd =
+        socket(AF_INET, SOCK_STREAM | O_NONBLOCK, IPPROTO_TCP);
     if ((*proxy)->socket_fd <= 0) goto err;
     
     (*proxy)->addr.sin_family = AF_INET;
@@ -77,7 +80,6 @@ http_proxy_client *proxy_accept(http_proxy *proxy) {
                                &(client->socklen));
     if (client->socket_fd <= 0) goto err;
 
-    printf("New client connection accepted!\n");
     return client;
 err:
     free(client);
@@ -94,7 +96,7 @@ pid_t start_worker(worker_job *job) {
 
     if (!(worker_pid = fork())) {
         job();
-        _exit;
+        _exit(0);
     }
 
     return worker_pid;
