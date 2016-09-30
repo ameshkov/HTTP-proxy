@@ -94,7 +94,7 @@ pid_t start_worker(worker_job *job) {
 
     if (!(worker_pid = fork())) {
         job();
-        exit;
+        _exit;
     }
 
     return worker_pid;
