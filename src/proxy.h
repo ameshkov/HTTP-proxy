@@ -5,10 +5,34 @@
 #define PROXY_H
 
 #include <unistd.h>
+#include <netinet/in.h>
 
 typedef struct http_proxy http_proxy;
 
 typedef struct http_proxy_client http_proxy_client;
+
+typedef struct http_proxy_target http_proxy_target;
+
+struct http_proxy {
+    int                 socket_fd;
+    struct sockaddr_in  addr;
+    unsigned int        port;
+};
+
+struct http_proxy_client {
+    int                 socket_fd;
+    struct sockaddr_in  addr;
+    socklen_t           socklen;
+    http_proxy_target   *target;
+};
+
+struct http_proxy_target {
+    int                 socket_fd;
+    struct sockaddr_in  addr;
+    socklen_t           socklen;
+    http_proxy_client   *client;
+};
+
 
 typedef void worker_job(void);
 

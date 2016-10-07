@@ -6,24 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+//#include <sys/select.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/fcntl.h>
-#include <netinet/in.h>
 #include <unistd.h>
 #include <errno.h>
 
-struct http_proxy {
-    int                 socket_fd;
-    struct sockaddr_in  addr;
-    unsigned int        port;
-};
-
-struct http_proxy_client {
-    int                 socket_fd;
-    struct sockaddr_in  addr;
-    socklen_t           socklen;
-};
+extern fd_set master_fds, read_fds, write_fds;
 
 int proxy_init(http_proxy **proxy, unsigned int port) {\
     int error = 0;
